@@ -596,6 +596,7 @@ int main(int argc, char* argv[])
 	main_color[0] = 0.25;
 	main_color[1] = 0.25;
 	main_color[2] = 0.25;
+	
 	InitGraphics(argc, argv);
 	return 0;
 }
@@ -615,7 +616,7 @@ void InitGraphics(int argc, char* argv[]) {
 	//Create an 800x600 window with its top-left corner at pixel (100, 100)
 	glutInitWindowPosition(100, 100); //pass (-1, -1) for Window-Manager defaults  glutInitWindowPosition(X, Y);
 	glutInitWindowSize(800, 600);  //glutInitWindowSize(width, hight);
-	glutCreateWindow("Test");
+	glutCreateWindow("T-Rex");
 
 	//OnDisplay will handle the paint event
 	glutDisplayFunc(OnDisplay);
@@ -660,13 +661,12 @@ void OnDisplay() {
 	glClearColor(1, 1, 1, 1);
 	//fill the whole color buffer with the clear color
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	
 	background();
 	print_score();
 	//ALL drawing code goes here
 	if (live_state == 0)
 	{
-		PlaySoundA((LPCSTR)"C:\\Users\\ahmed\\source\\repos\\Computer Graphics FP\\Computer Graphics FP\\Minecraft_Fall.WAV", NULL, SND_ASYNC);
 		dead_state = 1;
 		sky_speed = 0;
 		game_speed = 0;
