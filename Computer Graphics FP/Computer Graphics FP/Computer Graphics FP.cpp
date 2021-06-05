@@ -1,4 +1,5 @@
 #include <windows.h>	// Header file for the Windows Library
+#include <MMSystem.h>
 #include <gl/gl.h>	// Header file for the OpenGL32 Library
 #include <gl/glu.h>	// Header file for the GlU32 Library
 #include <gl/glut.h>	// Header file for the Glut32 Library
@@ -26,6 +27,7 @@ int feet_state, jump_state, live_state, dead_state, color_state;
 float game_speed, jump_speed, feet_up_speed, feet_down_speed, sky_speed;
 float main_color[3];//main_color;background_color
 float background_color[3];
+float game_time;
 vector <int>obs(3);
 void Timer(int);
 void OnKeyPress(unsigned char key, int x, int y);
@@ -615,6 +617,7 @@ a normal ASCII character is being pressed.
 
 int main(int argc, char* argv[])
 {
+	game_time = 1000 / 60;
 	check_score = hi_score = fXPos_sky = 0;
 	fXPos_dinosaur = -90;
 	fYPos_dinosaur = -78;
@@ -698,6 +701,7 @@ Handles the paint event. This event is triggered whenever
 our displayed graphics are lost or out-of-date.
 ALL rendering code should be written here.
 */
+
 void OnDisplay() {
 	// clear the transformation matrix
 	glLoadIdentity();
@@ -758,7 +762,7 @@ void Timer(int)
 	// call the ondisplay function
 	glutPostRedisplay();
 	// call 60 times Timer
-	glutTimerFunc(1000 / 60, Timer, 0);
+	glutTimerFunc(game_time, Timer, 0);
 
 	// the dinosaur is dead
 	if (fXPos_desert > -204 && fXPos_desert < -198 && fYPos_dinosaur < -72 && obs[0] == 1)
@@ -868,17 +872,21 @@ void OnKeyPress(unsigned char key, int x, int y)
 	if (key == 32 && fYPos_dinosaur == -78)
 		jump_state = 1;
 }
+
 void mouseButton(int button, int state, int x, int y) {
 
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && fYPos_dinosaur == -78)
 	{
 		//Jump from the left cleck
+		PlaySoundA((LPCSTR)"C:\\Users\\ahmed\\source\\repos\\Computer Graphics FP\\Computer Graphics FP\\jump.wav", NULL, SND_FILENAME | SND_ASYNC);
 		jump_state = 1;
 	}
 	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN && dead_state == 1)
 	{
 		//Reset the game if he/she click the right button
+		PlaySoundA((LPCSTR)"C:\\Users\\ahmed\\source\\repos\\Computer Graphics FP\\Computer Graphics FP\\death.wav", NULL, SND_FILENAME | SND_ASYNC);
+		game_time = 1000 / 60;
 		dead_state = fXPos_desert = fXPos_sky = score = feet_state = 0;
 		live_state = jump_speed = 1;
 		fXPos_dinosaur = -90;
