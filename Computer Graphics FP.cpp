@@ -24,8 +24,8 @@ void obstacle(int);
 float fXPos_dinosaur, fYPos_dinosaur, fYPos_feet1, fYPos_feet2,  fXPos_desert, fXPos_sky;
 int feet_state, jump_state, live_state, dead_state, color_state;
 float game_speed, jump_speed, feet_up_speed, feet_down_speed, sky_speed;
-GLfloat main_color[3] = { 0.25, 0.25, 0.25 };//main_color;background_color
-GLfloat background_color[3] = { 1,1,1 };
+float main_color[3];//main_color;background_color
+float background_color[3];
 vector <int>obs(3);
 void Timer(int);
 void OnKeyPress(unsigned char key, int x, int y);
@@ -132,13 +132,6 @@ void Desert()
 int skyY1, skyY2, skyY3;
 void background()
 {
-	glBegin(GL_QUADS);
-	glColor3fv(background_color);
-	glVertex2f(-100, 100);
-	glVertex2f(100, 100);
-	glVertex2f(100, -100);
-	glVertex2f(-100, -100);
-	glEnd();
 	glPushMatrix();
 	glColor3fv(main_color);
 	glTranslatef(fXPos_sky, 0, 0);
@@ -584,7 +577,7 @@ int main(int argc, char* argv[])
 	fXPos_desert  =  0;
 	fYPos_feet1 = -4;
 	fYPos_feet2 = -2.5;
-	feet_state = dead_state = color_state = 0;
+	feet_state = dead_state = 0;
 	live_state = 1;
 	jump_state = 2;
 	game_speed = 0.8;
@@ -596,6 +589,13 @@ int main(int argc, char* argv[])
 	skyY2 = 40;
 	skyY3 = 70;
 	obs = { 1,2,1 };
+	// color
+	background_color[0] = 1;
+	background_color[1] = 1;
+	background_color[2] = 1;
+	main_color[0] = 0.25;
+	main_color[1] = 0.25;
+	main_color[2] = 0.25;
 	InitGraphics(argc, argv);
 	return 0;
 }
@@ -660,6 +660,7 @@ void OnDisplay() {
 	glClearColor(1, 1, 1, 1);
 	//fill the whole color buffer with the clear color
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	background();
 	print_score();
 	//ALL drawing code goes here
@@ -672,12 +673,6 @@ void OnDisplay() {
 		jump_speed = 0;
 		feet_up_speed = 0;
 		feet_down_speed = 0;
-		background_color[0] = { 1 };
-		background_color[1] = { 1 };
-		background_color[2] = { 1 };
-		main_color[0] = { 0.25 };
-		main_color[1] = { 0.25 };
-		main_color[2] = { 0.25 };
 		print(-20, 0, "Game  Over");
 	}
 	if (hi_score < check_score && dead_state == 1)
@@ -736,30 +731,6 @@ void Timer(int)
 		sky_speed += 0.0011;
 	}
 	// 	change the gamecolor for hardmode
-	if (check_score % 10 == 0 && check_score != 0) {
-		//main_color;background_color
-		switch (color_state)
-		{
-		case 0:
-			background_color[0] = { 0.25 };
-			background_color[1] = { 0.25 };
-			background_color[2] = { 0.25 };
-			main_color[0] = { 1 };
-			main_color[1] = { 1 };
-			main_color[2] = { 1 };
-			color_state = 1;
-			break;
-		case 1:
-			background_color[0] = { 0 };
-			background_color[1] = { 1 };
-			background_color[2] = { 1 };
-			main_color[0] = { 0.25 };
-			main_color[1] = { 0.25 };
-			main_color[2] = { 0.25 };
-			color_state = 0;
-			break;
-		}
-	}
 	switch (feet_state)
 	{
 	case 0:
