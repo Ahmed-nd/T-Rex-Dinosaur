@@ -132,12 +132,17 @@ void Desert()
 int skyY1, skyY2, skyY3;
 void background()
 {
+	glBegin(GL_QUADS);
+	glColor3fv(background_color);
+	glVertex2f(-100, 100);
+	glVertex2f(100, 100);
+	glVertex2f(100, -100);
+	glVertex2f(-100, -100);
+	glEnd();
 	glPushMatrix();
 	glColor3fv(main_color);
 	glTranslatef(fXPos_sky, 0, 0);
-	//srand(time(0));
-	//obs = { rand() % 2 + 1,rand() % 2 + 1,rand() % 2 + 1 };
-	
+	// draw 3 skys with defrent places
 	drawCloud(150, skyY1, 2);
 	drawCloud(210, skyY2, 2);
 	drawCloud(270, skyY3, 2);
@@ -563,7 +568,46 @@ void obstacle(int state)
 
 	
 }
+void try_again()
+{
+	glColor3fv(main_color);
 
+	glBegin(GL_QUADS);
+	glVertex2f(5, 0);
+	glVertex2f(-5, 0);
+	glVertex2f(-5, -10);
+	glVertex2f(5, -10);
+	glEnd();
+
+	glLineWidth(4);
+
+	glColor3fv(background_color);
+	glBegin(GL_LINES);
+	glVertex2f(2, -3);
+	glVertex2f(3, -3);
+
+	glVertex2f(3, -3);
+	glVertex2f(3, -8);
+
+	glVertex2f(3, -8);
+	glVertex2f(-3, -8);
+
+	glVertex2f(-3, -8);
+	glVertex2f(-3, -3);
+
+	glVertex2f(-3, -3);
+	glVertex2f(-1, -3);
+
+
+	glEnd();
+	//glVertex2f(-1, -3);
+
+	glBegin(GL_TRIANGLES);
+	glVertex2f(1, -3);
+	glVertex2f(-1, -1);
+	glVertex2f(-1, -5);
+	glEnd();
+}
 /**
 Handles the key press. This event is whenever
 a normal ASCII character is being pressed.
@@ -626,7 +670,7 @@ void InitGraphics(int argc, char* argv[]) {
 	// here is the setting of the key function
 	glutKeyboardFunc(OnKeyPress);
 	glutMouseFunc(mouseButton);
-	//glutKeyboardFunc();
+	// the timer function
 	glutTimerFunc(1000, Timer, 0);
 	// Enable alpha transparency in OpenGL
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -661,10 +705,14 @@ void OnDisplay() {
 	glClearColor(1, 1, 1, 1);
 	//fill the whole color buffer with the clear color
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
+	// draw the skys
 	background();
+
+	// print the new score
 	print_score();
-	//ALL drawing code goes here
+
+	// if the Dinosaur dead the game will stop
 	if (live_state == 0)
 	{
 		dead_state = 1;
@@ -673,22 +721,27 @@ void OnDisplay() {
 		jump_speed = 0;
 		feet_up_speed = 0;
 		feet_down_speed = 0;
-		print(-20, 0, "Game  Over");
+		// resite the color
+		background_color[0] = 1;
+		background_color[1] = 1;
+		background_color[2] = 1;
+		main_color[0] = 0.25;
+		main_color[1] = 0.25;
+		main_color[2] = 0.25;
+		print(-16, 5, "Game  Over");
+		try_again();
 	}
 	if (hi_score < check_score && dead_state == 1)
 		hi_score = check_score;
 	if (hi_score)
 		print_HI_score();
-	// pushes the current matrix stack down by one,
-	// duplicating the current matrix.
-	// glPushMatrix and glPopMatrix are used here instead of glLoadIdentity.
-	
-	Desert();
-	Dinosaur();
-	///////////////////////////////////////////////////////////////////////////////
 
-	// swapping the buffers causes the rendering above to be 
-	// shown
+	// draw the Desert
+	Desert();
+	// draw the Dinosaur
+	Dinosaur();
+
+
 	glutSwapBuffers();
 
 }
@@ -729,6 +782,15 @@ void Timer(int)
 	if (check_score % 10 == 0 && check_score != 0) {
 		game_speed += 0.001;
 		sky_speed += 0.0011;
+	}
+	if (check_score > 200)
+	{
+		background_color[0] = 0.25;
+		background_color[1] = 0.25;
+		background_color[2] = 0.25;
+		main_color[0] = 1;
+		main_color[1] = 1;
+		main_color[2] = 1;
 	}
 	// 	change the gamecolor for hardmode
 	switch (feet_state)
@@ -783,6 +845,7 @@ void Timer(int)
 		srand(time(0));
 		obs = { rand() % 2 + 1,rand() % 2 + 1,rand() % 2 + 1 };
 	}
+	// sky speed
 	if (fXPos_sky > -450)
 	{
 		fXPos_sky -= sky_speed;
@@ -810,10 +873,12 @@ void mouseButton(int button, int state, int x, int y) {
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && fYPos_dinosaur == -78)
 	{
+		//Jump from the left cleck
 		jump_state = 1;
 	}
 	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN && dead_state == 1)
 	{
+		//Reset the game if he/she click the right button
 		dead_state = fXPos_desert = fXPos_sky = score = feet_state = 0;
 		live_state = jump_speed = 1;
 		fXPos_dinosaur = -90;
@@ -831,7 +896,7 @@ void mouseButton(int button, int state, int x, int y) {
 		obs = { 1,2,1 };
 	}
 }
-void print_score()    // -- print text --
+void print_score()    // -- print the score --
 {
 	char text[32];
 	sprintf_s(text, "Score:%.0f", (float)check_score);  // print text in opengl window 
@@ -841,7 +906,7 @@ void print_score()    // -- print text --
 	for (int i = 0; text[i] != NULL; i++)
 		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, text[i]); //ex GLUT_BITMAP_TIMES_ROMAN_24
 }
-void print_HI_score()    // -- print text --
+void print_HI_score()    // -- print high score --
 {
 	char text[32];
 	sprintf_s(text, "HI:%.0f", (float)hi_score);  // print text in opengl window 
