@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 #include<cstdlib>
+#include <stdio.h>
+#include<string>
 using namespace std;
 
 //These lines above link the code to the openGL libraries.
@@ -16,15 +18,24 @@ using namespace std;
 void Dinosaur_body();
 void Dinosaur_feet(int);
 void Dinosaur_hand();
-
+void drawCloud(int x, int y, int size);
 void obstacle(int);
 
-float fXPos_dinosaur, fYPos_dinosaur, fYPos_feet1, fYPos_feet2,  fXPos_desert;
-int state, jump_state, live_state;
-float game_speed, jump_speed, feet_up_speed, feet_down_speed;
-float score;
+float fXPos_dinosaur, fYPos_dinosaur, fYPos_feet1, fYPos_feet2,  fXPos_desert, fXPos_sky;
+int feet_state, jump_state, live_state, dead_state, color_state;
+float game_speed, jump_speed, feet_up_speed, feet_down_speed, sky_speed;
+GLfloat main_color[3] = { 0.25, 0.25, 0.25 };//main_color;background_color
+GLfloat background_color[3] = { 1,1,1 };
 vector <int>obs(3);
-
+void Timer(int);
+void OnKeyPress(unsigned char key, int x, int y);
+void mouseButton(int, int, int, int);
+void print(int x, int y, char const* string);
+void print_score();
+void print_HI_score();
+int check_score, hi_score;
+string s;
+char const* pchar;  //use char const* as target type
 /**
 Creates the main window, registers event handlers, and
 initializes OpenGL stuff.
@@ -48,7 +59,7 @@ void OnDisplay();
 void Dinosaur()
 {
 	// Dinosaur body
-	glColor3f(0.25, 0.25, 0.25);
+	glColor3fv(main_color);
 	glPushMatrix();
 	glTranslatef(fXPos_dinosaur, fYPos_dinosaur, 0);
 	
@@ -75,6 +86,7 @@ void Dinosaur()
 	glScalef(2, 2, 2);
 	Dinosaur_hand();
 	glPopMatrix();
+
 	glPopMatrix();
 }
 void Desert()
@@ -83,7 +95,8 @@ void Desert()
 	glPushMatrix();
 	glTranslatef(fXPos_desert, 0, 0);
 	//glScalef(4, 4, 4);
-	glColor3f(0.25, 0.25, 0.25);
+	
+	glColor3fv(main_color);
 	glPushMatrix();
 	glBegin(GL_QUADS);
 	glVertex2f(480, -73);
@@ -113,58 +126,142 @@ void Desert()
 	glScalef(4, 4, 4);
 	obstacle(obs[2]);
 	glPopMatrix();
+
 	glPopMatrix();
 }
+int skyY1, skyY2, skyY3;
+void background()
+{
+	glBegin(GL_QUADS);
+	glColor3fv(background_color);
+	glVertex2f(-100, 100);
+	glVertex2f(100, 100);
+	glVertex2f(100, -100);
+	glVertex2f(-100, -100);
+	glEnd();
+	glPushMatrix();
+	glColor3fv(main_color);
+	glTranslatef(fXPos_sky, 0, 0);
+	//srand(time(0));
+	//obs = { rand() % 2 + 1,rand() % 2 + 1,rand() % 2 + 1 };
+	
+	drawCloud(150, skyY1, 2);
+	drawCloud(210, skyY2, 2);
+	drawCloud(270, skyY3, 2);
+	glPopMatrix();
+}
+void drawCloud(int x, int y, int size)
+{
+	
+	glColor3fv(main_color);
+	glLineWidth(size);
+
+	glBegin(GL_LINES);
+	glVertex2f(x, y);
+	glVertex2f(x - 32, y);
+
+	glVertex2f(x - 32, y + 1);
+	glVertex2f(x - 33, y + 1);
+
+	glVertex2f(x, y);
+	glVertex2f(x, y + 2);
+
+	glVertex2f(x, y + 2);
+	glVertex2f(x - 1, y + 4);
+
+	glVertex2f(x - 1, y + 4);
+	glVertex2f(x - 3, y + 4);
+
+	glVertex2f(x - 3, y + 4);
+	glVertex2f(x - 3, y + 6);
+
+	glVertex2f(x - 7, y + 6);
+	glVertex2f(x - 3, y + 6);
+
+	glVertex2f(x - 7, y + 6);
+	glVertex2f(x - 7, y + 8);
+
+	glVertex2f(x - 12, y + 8);
+	glVertex2f(x - 7, y + 8);
+
+	glVertex2f(x - 10, y + 8);
+	glVertex2f(x - 10, y + 11);
+
+	glVertex2f(x - 11, y + 11);
+	glVertex2f(x - 10, y + 11);
+
+	glVertex2f(x - 11, y + 12);
+	glVertex2f(x - 11, y + 11);
+
+	glVertex2f(x - 11, y + 12);
+	glVertex2f(x - 13, y + 12);
+
+	glVertex2f(x - 13, y + 12);
+	glVertex2f(x - 13, y + 14);
+
+	glVertex2f(x - 13, y + 14);
+	glVertex2f(x - 17, y + 14);
+
+	glVertex2f(x - 17, y + 14);
+	glVertex2f(x - 17, y + 12);
+
+	glVertex2f(x - 17, y + 12);
+	glVertex2f(x - 22, y + 12);
+
+
+	glVertex2f(x - 22, y + 12);
+	glVertex2f(x - 22, y + 11);
+
+	glVertex2f(x - 22, y + 11);
+	glVertex2f(x - 23, y + 11);
+
+	glVertex2f(x - 23, y + 11);
+	glVertex2f(x - 23, y + 10);
+
+	glVertex2f(x - 23, y + 10);
+	glVertex2f(x - 26, y + 10);
+
+	glVertex2f(x - 26, y + 10);
+	glVertex2f(x - 26, y + 6);
+
+	glVertex2f(x - 26, y + 6);
+	glVertex2f(x - 30, y + 6);
+
+
+	glVertex2f(x - 30, y + 6);
+	glVertex2f(x - 30, y + 5);
+
+	glVertex2f(x - 30, y + 5);
+	glVertex2f(x - 35, y + 5);
+
+	glVertex2f(x - 35, y + 5);
+	glVertex2f(x - 35, y + 4);
+
+	glVertex2f(x - 35, y + 4);
+	glVertex2f(x - 36, y + 4);
+
+	glVertex2f(x - 36, y + 4);
+	glVertex2f(x - 36, y + 1);
+
+	glVertex2f(x - 36, y + 1);
+	glVertex2f(x - 37, y + 1);
+
+	glVertex2f(x - 38, y + 1);
+	glVertex2f(x - 40, y + 1);
+
+	glVertex2f(x - 40, y + 1);
+	glVertex2f(x - 40, y);
+
+	glVertex2f(x - 40, y);
+	glVertex2f(x - 41, y);
+	glEnd();
+}
 // Help Functions
-void DrawCircle(GLenum type, GLfloat xc, GLfloat yc, GLfloat radius, GLfloat half_circle = 2)
-{
-	// create circle
-	glBegin(type);
-	int points = 36;
-	float const PI = 3.141592654;
-	for (int i = 0; i < points; i++) {
-		float angle = half_circle * PI * i / points;
-		glVertex2f(xc + (radius * cos(angle))
-			, yc + (radius * sin(angle)));
-	}
-	glEnd();
-}
-void DrawCircleColored(GLenum type, float xc, float yc, int radius, float half_circle = 2)
-{
-	// create circle
-	glBegin(type);
-	float colors[2][3] = { {0,0,0},{1,1,1} };
-	int points = 50;
-	float const PI = 3.141592654;
-	glVertex2f(xc, yc);
-	for (int i = 0; i <= points; i++) {
-		glColor3fv(colors[i % 2]);
-		float angle = (half_circle * PI * i / points);
-		float x = xc + (radius * cos(angle)),
-			y = yc + (radius * sin(angle));
-		glVertex2f(x, y);
-	}
-	glEnd();
-}
-void DrawEllipse(GLenum type, GLfloat xc, GLfloat yc, GLfloat radius, GLfloat half_circle = 2)
-{
-	// create circle
-	glBegin(type);
-	int points = 360;
-	float const PI = 3.141592654;
-	for (float i = 0; i < points; i += 0.1) {
-		glVertex2f(xc + (radius * cos(i))
-			, yc + (radius / 2 * sin(i)));
-	}
-	glEnd();
-}
 void Dinosaur_body()
 {
 	//  Set shading model
 	glShadeModel(GL_FLAT);
 	//  Set the primitive color
-	
-
 	//  Display geometric primitives
 	glBegin(GL_TRIANGLE_STRIP);
 	glVertex2f(7.00, 8.03);
@@ -285,7 +382,7 @@ void Dinosaur_body()
 	glVertex2f(1.88, 7.69);
 	glVertex2f(2.15, 6.65);
 	glEnd();
-	if (!live_state)
+	if (live_state)
 	{
 		glBegin(GL_QUADS);
 		glVertex2f(5.6, 7.7);
@@ -293,7 +390,8 @@ void Dinosaur_body()
 		glVertex2f(6.7, 7.4);
 		glVertex2f(5.5, 7.4);
 		glEnd();
-		glColor3f(1.00, 1.00, 1.00);
+		
+		glColor3fv(background_color);
 		glBegin(GL_QUADS);
 		glVertex2f(5.45, 9.5);
 		glVertex2f(5.85, 9.5);
@@ -303,8 +401,7 @@ void Dinosaur_body()
 		
 	}
 	else {
-		glColor3f(1.00, 1.00, 1.00);
-
+		glColor3fv(background_color);
 		//  Display geometric primitives
 		glBegin(GL_QUADS);
 		glVertex2f(5.4, 9.5);
@@ -312,7 +409,7 @@ void Dinosaur_body()
 		glVertex2f(5.9, 8.8);
 		glVertex2f(5.4, 8.8);
 		glEnd();
-		glColor3f(0.25, 0.25, 0.25);
+		glColor3fv(main_color);
 		glBegin(GL_QUADS);
 		glVertex2f(5.5, 9.4);
 		glVertex2f(5.8, 9.4);
@@ -320,7 +417,7 @@ void Dinosaur_body()
 		glVertex2f(5.5, 8.9);
 		glEnd();
 	}
-	glColor3f(0.25, 0.25, 0.25);
+	glColor3fv(main_color);
 }
 void Dinosaur_feet(int state)
 {
@@ -473,79 +570,31 @@ void obstacle(int state)
 
 	
 }
-// Coordinates Graph
-void CoordinatesGraph(int xCG, int yCG)
-{
-	glColor3f(0.7, 0.7, 0.7);
-	glBegin(GL_LINES);
-	double yWidth = (yCG / 10) / 5;
-	for (int y = -yCG; y <= yCG; y += yWidth)
-	{
-		glVertex2f(xCG, y);
-		glVertex2f(-xCG, y);
 
-	}
-	glEnd();
-	glBegin(GL_LINES);
-	double xWidth = (xCG / 10) / 5;
-	for (int x = -xCG; x <= xCG; x += xWidth)
-	{
-		glVertex2f(x, yCG);
-		glVertex2f(x, -yCG);
-
-	}
-	glEnd();
-	glLineWidth(2);
-	glBegin(GL_LINES);
-	yWidth = yCG / 10;
-	for (int y = -yCG; y <= yCG; y += yWidth)
-	{
-		glVertex2f(xCG, y);
-		glVertex2f(-xCG, y);
-
-	}
-	glEnd();
-	glBegin(GL_LINES);
-	xWidth = xCG / 10;
-	for (int x = -xCG; x <= xCG; x += xWidth)
-	{
-		glVertex2f(x, yCG);
-		glVertex2f(x, -yCG);
-
-	}
-	glEnd();
-	glColor3f(0, 0, 0);
-	glLineWidth(2);
-	glBegin(GL_LINES);
-	// Y Coordinates
-	glVertex2f(0, yCG);
-	glVertex2f(0, -yCG);
-	// X Coordinates
-
-	glVertex2f(xCG, 0);
-	glVertex2f(-xCG, 0);
-	glEnd();
-}
 /**
 Handles the key press. This event is whenever
 a normal ASCII character is being pressed.
 */
-void screanSaver(int);
-void OnKeyPress(unsigned char key, int x, int y);
 
 int main(int argc, char* argv[])
 {
+	check_score = hi_score = fXPos_sky = 0;
 	fXPos_dinosaur = -90;
 	fYPos_dinosaur = -78;
-	fXPos_desert = score =  0;
+	fXPos_desert  =  0;
 	fYPos_feet1 = -4;
 	fYPos_feet2 = -2.5;
-	state = live_state = 0;
+	feet_state = dead_state = color_state = 0;
+	live_state = 1;
 	jump_state = 2;
 	game_speed = 0.8;
+	sky_speed = 0.6;
 	jump_speed = 1;
 	feet_up_speed = 0.15;
 	feet_down_speed = 0.2;
+	skyY1 = 20;
+	skyY2 = 40;
+	skyY3 = 70;
 	obs = { 1,2,1 };
 	InitGraphics(argc, argv);
 	return 0;
@@ -575,8 +624,9 @@ void InitGraphics(int argc, char* argv[]) {
 	//OnDisplay will handle the paint event
 	// here is the setting of the key function
 	glutKeyboardFunc(OnKeyPress);
+	glutMouseFunc(mouseButton);
 	//glutKeyboardFunc();
-	glutTimerFunc(1000, screanSaver, 0);
+	glutTimerFunc(1000, Timer, 0);
 	// Enable alpha transparency in OpenGL
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
@@ -592,7 +642,6 @@ void SetTransformations() {
 	//set up the logical coordinate system of the window: [-100, 100] x [-100, 100]
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
 	//define a 2-D orthographic projection matrix
 	//parameters: left, right, bottom, top
 	gluOrtho2D(-100, 100, -100, 100); //gluOrtho2D(GLdouble left,GLdouble right,GLdouble bottom,GLdouble top)
@@ -611,13 +660,33 @@ void OnDisplay() {
 	glClearColor(1, 1, 1, 1);
 	//fill the whole color buffer with the clear color
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	background();
+	print_score();
 	//ALL drawing code goes here
-
+	if (live_state == 0)
+	{
+		PlaySoundA((LPCSTR)"C:\\Users\\ahmed\\source\\repos\\Computer Graphics FP\\Computer Graphics FP\\Minecraft_Fall.WAV", NULL, SND_ASYNC);
+		dead_state = 1;
+		sky_speed = 0;
+		game_speed = 0;
+		jump_speed = 0;
+		feet_up_speed = 0;
+		feet_down_speed = 0;
+		background_color[0] = { 1 };
+		background_color[1] = { 1 };
+		background_color[2] = { 1 };
+		main_color[0] = { 0.25 };
+		main_color[1] = { 0.25 };
+		main_color[2] = { 0.25 };
+		print(-20, 0, "Game  Over");
+	}
+	if (hi_score < check_score && dead_state == 1)
+		hi_score = check_score;
+	if (hi_score)
+		print_HI_score();
 	// pushes the current matrix stack down by one,
 	// duplicating the current matrix.
 	// glPushMatrix and glPopMatrix are used here instead of glLoadIdentity.
-	
 	
 	Desert();
 	Dinosaur();
@@ -635,81 +704,63 @@ void OnDisplay() {
 Handles the key press. This event is whenever
 a normal ASCII character is being pressed.
 */
-int check;
-void screanSaver(int)
+float score = 0;
+void Timer(int)
 {
 	// call the ondisplay function
 	glutPostRedisplay();
-	// call 60 times screanSaver
-	glutTimerFunc(1000 / 60, screanSaver, 0);
-	// the score
-	score += game_speed;
-	check = (score / 10);
-	cout << check <<endl;
-	
-	if (check % 10 == 0 && check > 9)
-		game_speed += 0.001;
+	// call 60 times Timer
+	glutTimerFunc(1000 / 60, Timer, 0);
 
 	// the dinosaur is dead
-	if (fXPos_desert < -199 && fXPos_desert > -205 && fYPos_dinosaur < -72 && obs[0] == 1)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
-	}
-	else if (fXPos_desert < -199 && fXPos_desert > -206 && fYPos_dinosaur < -73 && obs[0] == 2)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
-	}
-	if (fXPos_desert < -239 && fXPos_desert > -255 && fYPos_dinosaur < -73 && obs[1] == 1)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
-	}
-	else if (fXPos_desert < -239 && fXPos_desert > -256 && fYPos_dinosaur < -73 && obs[1] == 2)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
-	}
-	if (fXPos_desert < -299 && fXPos_desert > -310 && fYPos_dinosaur < -72 && obs[2] == 1)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
-	}
-	else if (fXPos_desert < -299 && fXPos_desert > -311 && fYPos_dinosaur < -73 && obs[2] == 2)
-	{
-		game_speed = 0;
-		jump_speed = 0;
-		feet_up_speed = 0;
-		feet_down_speed = 0;
-		live_state = 1;
+	if (fXPos_desert > -204 && fXPos_desert < -198 && fYPos_dinosaur < -72 && obs[0] == 1)
+		live_state = 0;
+	else if (fXPos_desert > -215 && fXPos_desert < -197.5 && fYPos_dinosaur < -73 && obs[0] == 2)
+		live_state = 0;
+	if (fXPos_desert > -245 && fXPos_desert < -239 && fYPos_dinosaur < -73 && obs[1] == 1)
+		live_state = 0;
+	else if (fXPos_desert > -255 && fXPos_desert < -237.5 && fYPos_dinosaur < -73 && obs[1] == 2)
+		live_state = 0;
+	if (fXPos_desert > -304 && fXPos_desert < -298 && fYPos_dinosaur < -72 && obs[2] == 1)
+		live_state = 0;
+	else if (fXPos_desert > -315 && fXPos_desert < -297.5 && fYPos_dinosaur < -73 && obs[2] == 2)
+		live_state = 0;
 
+
+	// the score
+	score += game_speed;
+	check_score = score / 10;
+	// increase the speed
+	if (check_score % 10 == 0 && check_score != 0) {
+		game_speed += 0.001;
+		sky_speed += 0.0011;
 	}
-	// game speed
-	if (fXPos_desert > -330)
-		fXPos_desert -= game_speed;
-	else
-	{
-		fXPos_desert = 0;
-		srand(time(0));
-		obs = { rand()%2 +1,rand() % 2 + 1,rand() % 2 + 1 };
+	// 	change the gamecolor for hardmode
+	if (check_score % 10 == 0 && check_score != 0) {
+		//main_color;background_color
+		switch (color_state)
+		{
+		case 0:
+			background_color[0] = { 0.25 };
+			background_color[1] = { 0.25 };
+			background_color[2] = { 0.25 };
+			main_color[0] = { 1 };
+			main_color[1] = { 1 };
+			main_color[2] = { 1 };
+			color_state = 1;
+			break;
+		case 1:
+			background_color[0] = { 0 };
+			background_color[1] = { 1 };
+			background_color[2] = { 1 };
+			main_color[0] = { 0.25 };
+			main_color[1] = { 0.25 };
+			main_color[2] = { 0.25 };
+			color_state = 0;
+			break;
+		}
 	}
-	switch (state)
+	switch (feet_state)
 	{
 	case 0:
 		if (fYPos_feet1 < -2.5) {
@@ -720,7 +771,7 @@ void screanSaver(int)
 		{
 			fYPos_feet1 = -2.5;
 			fYPos_feet2 = -4;
-			state = 1;
+			feet_state = 1;
 		}
 
 		break;
@@ -733,13 +784,11 @@ void screanSaver(int)
 		else {
 			fYPos_feet1 = -4;
 			fYPos_feet2 = -2.5;
-			state = 0;
-		}
-			
-		break;
-	default:
+			feet_state = 0;
+		}	
 		break;
 	}
+	// dinosaur Jumb
 	if (jump_state == 1 && fYPos_dinosaur < -60)
 	{
 		fYPos_dinosaur += jump_speed;
@@ -749,6 +798,28 @@ void screanSaver(int)
 	else if(jump_state == 0 && fYPos_dinosaur > -78)
 	{
 		fYPos_dinosaur -= jump_speed;
+	}
+
+	// game speed
+	if (fXPos_desert > -370) {
+		
+		fXPos_desert -= game_speed;
+	}
+		
+	else
+	{
+		fXPos_desert = 0;
+		srand(time(0));
+		obs = { rand() % 2 + 1,rand() % 2 + 1,rand() % 2 + 1 };
+	}
+	if (fXPos_sky > -450)
+	{
+		fXPos_sky -= sky_speed;
+	}
+	else
+	{
+		fXPos_sky = 0;
+		skyY1 = rand() % 75 + 10, skyY2 = rand() % 75 + 10, skyY3 = rand() % 75 + 10;
 	}
 }
 
@@ -762,6 +833,65 @@ void OnKeyPress(unsigned char key, int x, int y)
 		exit(0);
 	if (key == 32 && fYPos_dinosaur == -78)
 		jump_state = 1;
+}
+void mouseButton(int button, int state, int x, int y) {
 
 
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && fYPos_dinosaur == -78)
+	{
+		jump_state = 1;
+	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN && dead_state == 1)
+	{
+		dead_state = fXPos_desert = fXPos_sky = score = feet_state = 0;
+		live_state = jump_speed = 1;
+		fXPos_dinosaur = -90;
+		fYPos_dinosaur = -78;
+		fYPos_feet1 = -4;
+		fYPos_feet2 = -2.5;
+		jump_state = 2;
+		game_speed = 0.8;
+		sky_speed = 0.6;
+		feet_up_speed = 0.15;
+		feet_down_speed = 0.2;
+		skyY1 = 20;
+		skyY2 = 40;
+		skyY3 = 70;
+		obs = { 1,2,1 };
+	}
+}
+void print_score()    // -- print text --
+{
+	char text[32];
+	sprintf_s(text, "Score:%.0f", (float)check_score);  // print text in opengl window 
+	glColor3fv(main_color);
+	//set the position of the text in the window using the x and y coordinates
+	glRasterPos2f(-90, 80);
+	for (int i = 0; text[i] != NULL; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, text[i]); //ex GLUT_BITMAP_TIMES_ROMAN_24
+}
+void print_HI_score()    // -- print text --
+{
+	char text[32];
+	sprintf_s(text, "HI:%.0f", (float)hi_score);  // print text in opengl window 
+
+	glColor3fv(main_color);
+	//set the position of the text in the window using the x and y coordinates
+	glRasterPos2f(-90, 90);
+	for (int i = 0; text[i] != NULL; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, text[i]); //ex GLUT_BITMAP_TIMES_ROMAN_24
+}
+void print(int x, int y, char const* string)
+{
+	glColor3fv(main_color);
+	//set the position of the text in the window using the x and y coordinates
+	glRasterPos2f(x, y);
+	//get the length of the string to display
+	int len = (int)strlen(string);
+
+	//loop to display character by character
+	for (int i = 0; i < len; i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+	}
 }
